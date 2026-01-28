@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>車両判定シミュレーター</title>
+    <style>
+        :root { --blue: #00479d; --red: #e60012; --bg: #f8f9fa; --gray: #444; }
+        
+        body { 
+            font-family: -apple-system, "Helvetica Neue", "Hiragino Kaku Gothic ProN", sans-serif; 
+            background: var(--bg); margin: 0; padding-bottom: 180px; -webkit-user-select: none;
+        }
+
+        /* ヘッダー */
+        .header { 
+            background: var(--blue); color: white; padding: 10px; text-align: center; 
+            border-bottom: 3px solid var(--red); position: sticky; top: 0; z-index: 1000;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .header h1 { margin: 0; font-size: 0.9rem; letter-spacing: 1px; }
+
+        /* カテゴリ見出し */
+        .section-title { 
+            background: var(--gray); color: white; padding: 8px 15px; 
+            font-weight: bold; font-size: 0.8rem; position: sticky; top: 43px; z-index: 999;
+        }
+
+        /* リストアイテム */
+        .item { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 10px 15px; background: white; border-bottom: 1px solid #eee; min-height: 58px;
+        }
+        .item-n { font-size: 0.9rem; font-weight: bold; color: #333; }
+        .pts-tag { color: var(--red); font-weight: bold; margin-left: 5px; font-size: 0.8rem; }
+
+        /* 入力UI：iPhoneで押しやすいサイズ */
+        .ctrls { display: flex; align-items: center; gap: 10px; }
+        .btn { 
+            width: 44px; height: 44px; background: #fff; border: 1px solid #ccc; 
+            font-size: 1.5rem; font-weight: bold; border-radius: 8px;
+            box-shadow: 0 2px 0 #ddd; display: flex; align-items: center; justify-content: center;
+        }
+        .btn:active { transform: translateY(2px); box-shadow: none; background: #eee; }
+        .qty-input { 
+            width: 45px; height: 40px; text-align: center; border: 1px solid #ccc; 
+            font-size: 1.2rem; font-weight: bold; border-radius: 6px; -webkit-appearance: none;
+        }
+
+        /* フリー入力 */
+        .free-row { flex-direction: column; align-items: stretch; gap: 8px; padding: 12px 15px; background: #fff; border-bottom: 1px solid #eee; }
+        .free-inputs { display: flex; gap: 8px; margin-bottom: 8px; }
+        .free-name { flex: 2; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 0.9rem; }
+        .free-pts { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 0.9rem; text-align: center; color: var(--red); font-weight: bold; }
+
+        /* 固定フッター */
+        .footer { 
+            position: fixed; bottom: 0; width: 100%; background: white; 
+            border-top: 4px solid var(--blue); z-index: 1001;
+            padding-bottom: env(safe-area-inset-bottom);
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+        }
+        .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 10px 10px 5px 10px; border-bottom: 1px solid #eee; }
+        .price-box { text-align: center; }
+        .price-label { font-size: 0.65rem; color: #666; font-weight: bold; margin-bottom: 2px; }
+        .price-val { font-size: 1.3rem; font-weight: bold; color: var(--red); }
+        
+        .footer-main { display: flex; justify-content: space-around; align-items: center; padding: 10px; }
+        .total-box { text-align: center; }
+        .res-v { font-size: 1.6rem; font-weight: bold; color: var(--blue); }
+        .reset-btn { background: #666; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; font-size: 0.85rem; }
+
+        /* 設定画面 */
+        #admin-panel { 
+            display: none; position: fixed; top: 10%; left: 5%; width: 90%; 
+            background: white; border: 2px solid var(--blue); border-radius: 12px; 
+            z-index: 2000; padding: 20px; box-sizing: border-box; box-shadow: 0 0 100px rgba(0,0,0,0.5); 
+        }
+        .admin-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .admin-table th { font-size: 0.7rem; color: #666; }
+        .admin-table input { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; text-align: right; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>車両判定システム</h1>
+    <button onclick="openAdmin()" style="font-size: 0.7rem; background:none; color:white; border:1px solid white; border-radius:4px; padding:4px 8px;">設定</button>
+</div>
+
+<div id="main-content">
+    <div class="section-title">リビング・キッチン</div>
+    <div id="list-living"></div>
+    <div class="section-title">家具・家電</div>
